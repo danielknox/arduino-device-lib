@@ -73,7 +73,6 @@ private:
   void configureKR920_923();
   void configureIN865_867();
   void configureChannels(uint8_t fsb);
-  bool setSF(uint8_t sf);
   bool waitForOk();
 
   void sendCommand(uint8_t table, uint8_t index, bool appendSpace, bool print = true);
@@ -90,6 +89,7 @@ public:
   size_t getHardwareEui(char *buffer, size_t size);
   size_t getAppEui(char *buffer, size_t size);
   uint16_t getVDD();
+  bool setSF(uint8_t sf);
   void onMessage(void (*cb)(const uint8_t *payload, size_t size, port_t port));
   bool provision(const char *appEui, const char *appKey);
   bool join(const char *appEui, const char *appKey, int8_t retries = -1, uint32_t retryDelay = 10000);
@@ -102,8 +102,10 @@ public:
   void wake();
   void saveState();
   void linkCheck(uint16_t seconds);
-  uint8_t getLinkCheckGateways();  
+  uint8_t getLinkCheckGateways();
   uint8_t getLinkCheckMargin();
+  int8_t getPWR();
+  uint32_t getFreq();
 };
 
 #endif

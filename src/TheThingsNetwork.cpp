@@ -108,8 +108,10 @@ const char radio_get_prlen[] PROGMEM = "prlen";
 const char radio_get_crc[] PROGMEM = "crc";
 const char radio_get_cr[] PROGMEM = "cr";
 const char radio_get_sf[] PROGMEM = "sf";
+const char radio_get_pwr[] PROGMEM = "pwr";
+const char radio_get_freq[] PROGMEM = "freq";
 
-const char *const radio_table[] PROGMEM = {radio_prefix, radio_set, radio_get, radio_get_bw, radio_get_prlen, radio_get_crc, radio_get_cr, radio_get_sf};
+const char *const radio_table[] PROGMEM = {radio_prefix, radio_set, radio_get, radio_get_bw, radio_get_prlen, radio_get_crc, radio_get_cr, radio_get_sf, radio_get_pwr, radio_get_freq};
 
 #define RADIO_PREFIX 0
 #define RADIO_SET 1
@@ -119,6 +121,8 @@ const char *const radio_table[] PROGMEM = {radio_prefix, radio_set, radio_get, r
 #define RADIO_GET_CRC 5
 #define RADIO_GET_CR 6
 #define RADIO_GET_SF 7
+#define RADIO_GET_PWR 8
+#define RADIO_GET_FREQ 9
 
 const char sys_prefix[] PROGMEM = "sys";
 const char sys_sleep[] PROGMEM = "sleep";
@@ -192,6 +196,7 @@ const char mac_rx2[] PROGMEM = "rx2";
 const char mac_ch[] PROGMEM = "ch";
 const char mac_gwnb[] PROGMEM = "gwnb";
 const char mac_mrgn[] PROGMEM = "mrgn";
+//const char mac_mrgn[] PROGMEM = "mrgn";
 
 const char *const mac_options[] PROGMEM = {mac_devaddr, mac_deveui, mac_appeui, mac_nwkskey, mac_appskey, mac_appkey, mac_pwridx, mac_dr, mac_adr, mac_bat, mac_retx, mac_linkchk, mac_rxdelay1, mac_rxdelay2, mac_band, mac_ar, mac_rx2, mac_ch, mac_gwnb, mac_mrgn};
 
@@ -315,6 +320,8 @@ uint16_t TheThingsNetwork::getVDD()
   return 0;
 }
 
+
+
 void TheThingsNetwork::debugPrintIndex(uint8_t index, const char *value)
 {
   char message[100];
@@ -417,7 +424,7 @@ void TheThingsNetwork::reset(bool adr)
   size_t length = readResponse(SYS_TABLE, SYS_RESET, buffer, sizeof(buffer));
 
   autoBaud();
-  length = readResponse(SYS_TABLE, SYS_TABLE, SYS_GET_VER, buffer, sizeof(buffer));  
+  length = readResponse(SYS_TABLE, SYS_TABLE, SYS_GET_VER, buffer, sizeof(buffer));
 
   // buffer contains "RN2xx3[xx] x.x.x ...", splitting model from version
   char *model = strtok(buffer, " ");
@@ -776,8 +783,8 @@ void TheThingsNetwork::configureKR920_923()
 void TheThingsNetwork::configureIN865_867()
 {
   sendMacSet(MAC_ADR, "off"); // TODO: remove when ADR is implemented for this plan
-  sendMacSet(MAC_RX2, "2 866550000"); // SF10  
-  
+  sendMacSet(MAC_RX2, "2 866550000"); // SF10
+
   // Disable the three default LoRaWAN channels
   sendChSet(MAC_CHANNEL_STATUS, 0, "off");
   sendChSet(MAC_CHANNEL_STATUS, 1, "off");
@@ -1035,7 +1042,7 @@ void TheThingsNetwork::sleep(uint32_t mseconds)
 }
 
 void TheThingsNetwork::wake()
-{ 
+{
   autoBaud();
 }
 
@@ -1051,7 +1058,7 @@ void TheThingsNetwork::linkCheck(uint16_t seconds)
   modemStream->write(buffer);
   modemStream->write(SEND_MSG);
   debugPrintLn(buffer);
-  waitForOk();  
+  waitForOk();
 }
 
 uint8_t TheThingsNetwork::getLinkCheckGateways()
@@ -1063,5 +1070,17 @@ uint8_t TheThingsNetwork::getLinkCheckGateways()
 uint8_t TheThingsNetwork::getLinkCheckMargin()
 {
   readResponse(MAC_TABLE, MAC_GET_SET_TABLE, MAC_MRGN, buffer, sizeof(buffer));
+  return strtol(buffer, NULL, 10);
+}
+
+int8_t TheThingsNetwork::getPWR()
+{
+  readResponse(RADIO_TABLE, RADIO_TABLE, RADIO_GET_PWR, buffer, sizeof(buffer));
+  return strtol(buffer, NULL, 10);
+}
+
+uint32_t TheThingsNetwork::getFreq()
+{
+  readResponse(RADIO_TABLE, RADIO_TABLE, RADIO_GET_FREQ, buffer, sizeof(buffer));
   return strtol(buffer, NULL, 10);
 }
