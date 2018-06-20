@@ -74,7 +74,6 @@ private:
   void configureIN865_867();
   void configureChannels(uint8_t fsb);
   bool waitForOk();
-
   void sendCommand(uint8_t table, uint8_t index, bool appendSpace, bool print = true);
   bool sendMacSet(uint8_t index, const char *value);
   bool sendChSet(uint8_t index, uint8_t channel, const char *value);
@@ -89,7 +88,6 @@ public:
   size_t getHardwareEui(char *buffer, size_t size);
   size_t getAppEui(char *buffer, size_t size);
   uint16_t getVDD();
-  bool setSF(uint8_t sf);
   void onMessage(void (*cb)(const uint8_t *payload, size_t size, port_t port));
   bool provision(const char *appEui, const char *appKey);
   bool join(const char *appEui, const char *appKey, int8_t retries = -1, uint32_t retryDelay = 10000);
@@ -101,6 +99,7 @@ public:
   void sleep(uint32_t mseconds);
   void wake();
   void saveState();
+  bool setSF(uint8_t sf);
   void linkCheck(uint16_t seconds);
   uint8_t getLinkCheckGateways();
   uint8_t getLinkCheckMargin();
