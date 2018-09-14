@@ -94,6 +94,7 @@ public:
   bool join(int8_t retries = -1, uint32_t retryDelay = 10000);
   bool personalize(const char *devAddr, const char *nwkSKey, const char *appSKey);
   bool personalize();
+  bool checkPersonalize();
   ttn_response_t sendBytes(const uint8_t *payload, size_t length, port_t port = 1, bool confirm = false, uint8_t sf = 0);
   ttn_response_t poll(port_t port = 1, bool confirm = false);
   void sleep(uint32_t mseconds);

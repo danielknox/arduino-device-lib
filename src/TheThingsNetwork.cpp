@@ -471,13 +471,34 @@ bool TheThingsNetwork::personalize(const char *devAddr, const char *nwkSKey, con
   sendMacSet(MAC_DEVADDR, devAddr);
   sendMacSet(MAC_NWKSKEY, nwkSKey);
   sendMacSet(MAC_APPSKEY, appSKey);
-  return personalize();
+
+  if(personalize()){
+    saveState();
+    return true;
+  }
+  return false;
 }
 
 bool TheThingsNetwork::personalize()
 {
   configureChannels(fsb);
   setSF(sf);
+  sendJoinSet(MAC_JOIN_MODE_ABP);
+  readLine(buffer, sizeof(buffer));
+  if (pgmstrcmp(buffer, CMP_ACCEPTED) != 0)
+  {
+    debugPrintMessage(ERR_MESSAGE, ERR_PERSONALIZE_NOT_ACCEPTED, buffer);
+    debugPrintMessage(ERR_MESSAGE, ERR_CHECK_CONFIGURATION);
+    return false;
+  }
+
+  readResponse(MAC_TABLE, MAC_CH_TABLE, MAC_CHANNEL_STATUS, buffer, sizeof(buffer));
+  debugPrintMessage(SUCCESS_MESSAGE, SCS_PERSONALIZE_ACCEPTED, buffer);
+  return true;
+}
+
+bool TheThingsNetwork::checkPersonalize()
+{
   sendJoinSet(MAC_JOIN_MODE_ABP);
   readLine(buffer, sizeof(buffer));
   if (pgmstrcmp(buffer, CMP_ACCEPTED) != 0)
