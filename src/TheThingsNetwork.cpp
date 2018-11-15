@@ -110,8 +110,10 @@ const char radio_get_cr[] PROGMEM = "cr";
 const char radio_get_sf[] PROGMEM = "sf";
 const char radio_get_pwr[] PROGMEM = "pwr";
 const char radio_get_freq[] PROGMEM = "freq";
+const char radio_get_snr[] PROGMEM = "snr";
 
-const char *const radio_table[] PROGMEM = {radio_prefix, radio_set, radio_get, radio_get_bw, radio_get_prlen, radio_get_crc, radio_get_cr, radio_get_sf, radio_get_pwr, radio_get_freq};
+
+const char *const radio_table[] PROGMEM = {radio_prefix, radio_set, radio_get, radio_get_bw, radio_get_prlen, radio_get_crc, radio_get_cr, radio_get_sf, radio_get_pwr, radio_get_freq, radio_get_snr};
 
 #define RADIO_PREFIX 0
 #define RADIO_SET 1
@@ -123,6 +125,7 @@ const char *const radio_table[] PROGMEM = {radio_prefix, radio_set, radio_get, r
 #define RADIO_GET_SF 7
 #define RADIO_GET_PWR 8
 #define RADIO_GET_FREQ 9
+#define RADIO_GET_SNR 10
 
 const char sys_prefix[] PROGMEM = "sys";
 const char sys_sleep[] PROGMEM = "sleep";
@@ -1097,6 +1100,12 @@ uint8_t TheThingsNetwork::getLinkCheckMargin()
 int8_t TheThingsNetwork::getPWR()
 {
   readResponse(RADIO_TABLE, RADIO_TABLE, RADIO_GET_PWR, buffer, sizeof(buffer));
+  return strtol(buffer, NULL, 10);
+}
+
+int8_t TheThingsNetwork::getSNR()
+{
+  readResponse(RADIO_TABLE, RADIO_TABLE, RADIO_GET_SNR, buffer, sizeof(buffer));
   return strtol(buffer, NULL, 10);
 }
 

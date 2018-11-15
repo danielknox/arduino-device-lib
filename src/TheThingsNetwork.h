@@ -83,7 +83,7 @@ private:
 
 public:
   TheThingsNetwork(Stream &modemStream, Stream &debugStream, ttn_fp_t fp, uint8_t sf = TTN_DEFAULT_SF, uint8_t fsb = TTN_DEFAULT_FSB);
-  void reset(bool adr = true);
+  void reset(bool adr = false);
   void showStatus();
   size_t getHardwareEui(char *buffer, size_t size);
   size_t getAppEui(char *buffer, size_t size);
@@ -105,6 +105,7 @@ public:
   uint8_t getLinkCheckGateways();
   uint8_t getLinkCheckMargin();
   int8_t getPWR();
+  int8_t getSNR();
   uint32_t getFreq();
 };
 
