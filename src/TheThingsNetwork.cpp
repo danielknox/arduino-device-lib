@@ -367,12 +367,18 @@ void TheThingsNetwork::clearReadBuffer()
   }
 }
 
-size_t TheThingsNetwork::readLine(char *buffer, size_t size)
+size_t TheThingsNetwork::readLine(char *buffer, size_t size, uint8_t attempts)
 {
   size_t read = 0;
-  while (read == 0)
+  while (!read && attempts--)
   {
     read = modemStream->readBytesUntil('\n', buffer, size);
+  }
+  if (!read)
+  { // If attempts is activated return 0 and set RN state marker
+    this->needsHardReset = true; // Inform the application about the radio module is not responsive.
+    debugPrintLn("No response from RN module.");
+    return 0;
   }
   buffer[read - 1] = '\0'; // set \r to \0
   return read;
@@ -424,10 +430,10 @@ void TheThingsNetwork::autoBaud()
 void TheThingsNetwork::reset(bool adr)
 {
   autoBaud();
-  size_t length = readResponse(SYS_TABLE, SYS_RESET, buffer, sizeof(buffer));
+  readResponse(SYS_TABLE, SYS_RESET, buffer, sizeof(buffer));
 
   autoBaud();
-  length = readResponse(SYS_TABLE, SYS_TABLE, SYS_GET_VER, buffer, sizeof(buffer));
+  readResponse(SYS_TABLE, SYS_TABLE, SYS_GET_VER, buffer, sizeof(buffer));
 
   // buffer contains "RN2xx3[xx] x.x.x ...", splitting model from version
   char *model = strtok(buffer, " ");
@@ -446,6 +452,13 @@ void TheThingsNetwork::reset(bool adr)
     sendMacSet(MAC_ADR, "off");
   }
   this->adr = adr;
+  this->needsHardReset = false;
+}
+
+void TheThingsNetwork::resetHard(uint8_t resetPin){
+  digitalWrite(resetPin, LOW);
+  delay(1000);
+  digitalWrite(resetPin, HIGH);
 }
 
 void TheThingsNetwork::saveState()
@@ -877,10 +890,10 @@ bool TheThingsNetwork::setSF(uint8_t sf)
   case TTN_FP_AS920_923:
   case TTN_FP_AS923_925:
   case TTN_FP_KR920_923:
-  case TTN_FP_AU915:
     dr = 12 - sf;
     break;
   case TTN_FP_US915:
+  case TTN_FP_AU915:
     dr = 10 - sf;
     break;
   }

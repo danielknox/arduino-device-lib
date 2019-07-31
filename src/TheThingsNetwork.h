@@ -6,7 +6,11 @@
 
 #include <Arduino.h>
 #include <Stream.h>
+#if defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_SAMD)
 #include <avr/pgmspace.h>
+#else
+#include <pgmspace.h>
+#endif
 
 #define TTN_DEFAULT_SF 7
 #define TTN_DEFAULT_FSB 2
@@ -57,7 +61,7 @@ private:
   void (*messageCallback)(const uint8_t *payload, size_t size, port_t port);
 
   void clearReadBuffer();
-  size_t readLine(char *buffer, size_t size);
+  size_t readLine(char *buffer, size_t size, uint8_t attempts = 3);
   size_t readResponse(uint8_t prefixTable, uint8_t indexTable, uint8_t index, char *buffer, size_t size);
   size_t readResponse(uint8_t table, uint8_t index, char *buffer, size_t size);
 
@@ -82,8 +86,11 @@ private:
   void sendGetValue(uint8_t table, uint8_t prefix, uint8_t index);
 
 public:
+  bool needsHardReset = false;
+
   TheThingsNetwork(Stream &modemStream, Stream &debugStream, ttn_fp_t fp, uint8_t sf = TTN_DEFAULT_SF, uint8_t fsb = TTN_DEFAULT_FSB);
   void reset(bool adr = false);
+  void resetHard(uint8_t resetPin);
   void showStatus();
   size_t getHardwareEui(char *buffer, size_t size);
   size_t getAppEui(char *buffer, size_t size);
